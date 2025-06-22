@@ -1,0 +1,255 @@
+
+1. Write a C program to print file status information using stat function.
+
+#include<stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include<unistd.h>
+struct stat statbuf;
+char dirpath[256];
+
+int main(int argc, char *argv[])
+{
+    // getcwd is to get the name of the current working directory if found
+getcwd(dirpath,256);
+DIR *dir = opendir(dirpath);
+struct dirent *dp;
+
+for (dp=readdir(dir); dp != NULL ;  dp=readdir(dir))
+
+ {
+  stat(dp->d_name, &statbuf);
+  printf("the file name is %s \n", dp->d_name);
+  printf("dir = %d\n", S_ISDIR(statbuf.st_mode));
+  printf("file size is %ld in bytes \n", statbuf.st_size);
+  printf("last modified time is %ld in seconds \n", statbuf.st_mtime);
+  printf("last access time is %ld in seconds \n", statbuf.st_atime);
+  printf("The device containing the file is %ld\n", statbuf.st_dev);
+  printf("File serial number is %ld\n\n", statbuf.st_ino);
+  }
+}
+OUTPUT:
+the file name is fileone.txt
+dir = 0
+file size is 31 in bytes
+last modified time is 1581656490 in seconds
+last access time is 1581656969 in seconds
+The device containing the file is 2053
+File serial number is 2099241
+
+the file name is filestatus.c
+dir = 0
+file size is 772 in bytes
+last modified time is 1581146159 in seconds
+last access time is 1581920990 in seconds
+The device containing the file is 2053
+File serial number is 2099181
+
+
+
+2. Write a C program that illustrate the use of lseek function.  
+
+
+/* This is the program to create a hole in a file using lseek(). */
+#include<stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+
+int main()
+{
+
+  char  buf1[] = "abcdefghij";
+  char  buf2[] = "ABCDEFGHIJ";
+
+        int fd;
+       if((fd=open("lseekfile",O_CREAT|O_TRUNC|O_RDWR,0777)) < -1)
+          {
+            printf("unable to create a file\n");
+            return 1;
+           }
+
+        if(write(fd,buf1,10) !=10)
+           printf("buf1 write error ");
+
+        // now offset=10
+
+        if(lseek(fd,1000,SEEK_SET) == -1)
+          printf("lseek error");
+
+        // now offset =1000
+
+        if(write(fd,buf2,10) != 10)
+        printf("buf2  write error");
+
+        // now offset=1010
+
+        return 0;
+}
+
+OUTPUT:
+
+oslab-16@oslab16-OptiPlex-3020:~/sunitha$ cat lseekfile
+abcdefghijABCDEFGHIJ
+
+oslab-16@oslab16-OptiPlex-3020:~/sunitha$ od -c lseekfile
+0000000   a   b   c   d   e   f   g   h   i   j  \0  \0  \0  \0  \0  \0
+0000020  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
+*
+0001740  \0  \0  \0  \0  \0  \0  \0  \0   A   B   C   D   E   F   G   H
+0001760   I   J
+0001762
+oslab-16@oslab16-OptiPlex-3020:~/sunitha$
+
+3.
+
+ /* Write a C Program that copies standard input to  standard output */
+#include<stdio.h>
+#include<stdlib.h>
+
+int main(void)
+{
+  int c;
+  while ( ( c= getc(stdin)) != EOF)
+    if( putc(c,stdout) == EOF)
+       printf("output error");
+
+  if(ferror(stdin))
+  printf("Input error");
+
+  exit(0);
+}   
+
+4.
+
+
+/* write c program to  read from standard input   and write standard output(unbuffered IO)*/
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+#define BUFF_SIZE 1000
+int main(void)
+{
+   int n;
+   char buf[BUFF_SIZE];
+   while((n=read(STDIN_FILENO,buf,BUFF_SIZE)) >0)
+       if(write(STDOUT_FILENO,buf,n) != n)
+          printf("write error " );
+
+   if(n< 0)
+   printf(" read error ");
+   exit(0);
+}
+
+5.
+ /*write a c program to read from standard input  (keyboard) and write to file*/
+
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<stdio.h>
+
+int main()
+{
+	int n,fd;
+	char buff[50];	// declaring buffer
+
+	//message printing on the display
+	printf("Enter text to write in the file:\n");
+	//read from keyboard, specifying 0 as fd for std input deice
+	//Here, n stores the number of characters
+	n= read(0, buff, 50);
+
+	// creating a new file using open.
+	fd=open("fileone.txt",O_CREAT | O_RDWR, 0777);
+
+	//writting input data to file (fd)
+	write(fd, buff, n);
+	//Write to display (1 is standard fd for output device)
+	write(1, buff, n);
+
+	//closing the file
+	int close(int fd);
+
+	return 0;
+}
+
+6.
+
+/* write a C program to read from  file  and write/display  on standard output */
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+
+#define BUFF_SIZE 1000
+
+int main(void)
+{
+
+   int n,fd;
+   char buf[BUFF_SIZE];
+
+   fd = open("fileone.txt",O_RDWR,0644);
+   while((n=read(fd,buf,BUFF_SIZE)) >0)
+       if(write(1,buf,n) != n)
+          printf("write error " );
+
+   if(n< 0)
+   printf(" read error ");
+   exit(0);
+}
+
+
+7.
+
+/* write a C program to read from  file  and write  to another file */
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+
+#define BUFF_SIZE 1000
+
+int main(void)
+{
+
+   int n,fd1,fd2;
+   char buff[BUFF_SIZE];
+
+    //open the file for reading
+   fd1 = open("testfile.txt",O_RDWR,0644);
+
+   //read the data from file
+   n=read(fd1,buff,BUFF_SIZE);
+
+
+// creating a new file using open.
+        fd2=open("fileforcopy.txt",O_CREAT | O_RDWR, 0777);
+
+        //writting data to file (fd)
+       if( write(fd2, buff, n) == n)
+       printf("file copying is successful. and the data is:\n");
+
+      //Write to display (1 is standard fd for output device)
+        write(1, buff, n);
+
+        //closing the files
+        int close(int fd1);
+        int close(int fd2);
+
+        return 0;
+
+}
+
+
+
+The way that programs talk to the operating system is via ``system calls.'' A system call looks like a procedure call (see below), but it's different -- it is a request to the operating system to perform some activity.
+•	System calls are expensive. While a procedure call can usually be performed in a few machine instructions, a system call requires the computer to save its state, let the operating system take control of the CPU, have the operating system perform some function, have the operating system save its state, and then have the operating system give control of the CPU back to you. This concept is important, and will be seen time and time again in this class.
+•	System calls are system dependent. Knowing this, it would not be a good idea to directly use system calls when portability cannot be neglected. System calls are also quite complex. Most often, it involves the duo of TRAP and RET (or some variations of those two). To implement system call, one would need specialized knowledge of I/O registers, the sequence of operations needed to use them; and most important of all, implement enough protection because I/O resources are generally shared among multiple users and/or processes.
+
