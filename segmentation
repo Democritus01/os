@@ -1,0 +1,121 @@
+
+1.Write a  C Program for the Implementation of Segmentation technique of  Memory management.
+
+#include<stdio.h>
+struct list
+{
+int seg;
+int base;
+int limit;
+struct list *next;
+} *p;
+void insert(struct list *q, int  base ,int  limit ,int seg)
+{
+if(p==NULL)
+{
+p = malloc (sizeof (Struct list));
+p->limit=limit;
+p->base=base;
+p->seg=seg;
+p->next=NULL;
+}
+else
+{
+while(q->next!=NULL)
+{
+q=q->next;
+Printf (“yes”);
+}
+q->next=malloc(sizeof(Struct list));
+q->next ->limit=limit;
+q->next ->base=base;
+q->next ->seg=seg;
+q->next ->next=NULL;
+}
+}
+int find(struct list *q ,int seg)
+{
+while(q->seg!=seg)
+{
+q=q->next;
+}
+return q->limit;
+}
+int search(struct list *q , int seg)
+{
+while(q->seg!=seg)
+{
+q=q->next;
+}
+return q->base;
+}
+
+main()
+{
+p=NULL;
+int seg ,offset ,limit ,base ,c ,s ,physical;
+printf(“Enter segmentation table\n”);
+printf(“Enter -1 as segment value for termination\n”);
+do
+{
+printf(“Enter segment number”);
+scanf (“%d”, &seg);
+if(seg!=-1)
+{
+printf(“Enter base value:”);
+scanf(“%d”, &base);
+printf(“Enter value for limit:”);
+scanf(“%d”, &limit);
+insert(p ,base ,limit ,seg);
+}
+}while(seg!=-1);
+
+printf(“Enter offset:”);
+scanf(“%d”, &offset);
+printf(“Enter segmentation number:”);
+scanf(“%d”, &seg);
+c=find(p, seg); // returns limit value
+s=search(p, seg); // returns base value
+if(offset<c)
+{
+physical=s+ offset;
+printf(“Address in physical memory %d\n”, physical);
+}
+else
+{
+printf(“error”);
+}
+}
+
+OUTPUT:
+
+$ cc seg.c
+$ ./a.out
+
+Enter segment table
+Enter -1 as segmentation value for termination
+Enter segment number:1
+Enter base value:2000
+Enter value for limit:100
+Enter segment number:2
+Enter base value:2500
+Enter value for limit:100
+Enter segmentation number:-1
+Enter offset:90
+Enter segment number:2
+Address in physical memory 2590
+
+[examuser56@localhost ~]$ ./a.out
+
+Enter segment table
+Enter -1 as segmentation value for termination
+Enter segment number:1
+Enter base value:2000
+Enter value for limit:100
+Enter segment number:2
+Enter base value:2500
+Enter value for limit:100
+Enter segmentation number:-1
+Enter offset:90
+Enter segment number:1
+Address in physical memory 2090 
