@@ -1,0 +1,95 @@
+//Write a C program to simulate paging technique of memory management.
+
+#include<stdio.h>
+
+int main()
+{
+int ms, ps, nop, np, rempages, i, j, x, y, pa, offset;
+int s[10], fno[10][20];
+
+printf("\nEnter the memory size -- ");
+scanf("%d", &ms);
+printf("\nEnter the page size -- ");
+scanf("%d", &ps);
+nop = ms/ps;
+printf("\n The no. of pages available in memory are -- %d ", nop);
+printf("\n Enter number of processes -- ");
+scanf("%d", &np);
+rempages = nop;
+
+for(i=1;i<=np; i++)
+{
+printf("\n Enter no. of pages required for p[%d]-- ",i);
+scanf("%d", &s[i]);
+if(s[i] >rempages)
+{
+printf("\n Memory is Full");
+break;
+}
+rempages = rempages - s[i];
+printf("\n Enter page table for p[%d] --- ",i);
+for(j=0;j<s[i];j++)
+scanf("%d", &fno[i][j]);
+}
+printf("\nEnter Logical Address to find Physical Address ");
+printf("\nEnter process no. and page number and offset -- ");
+scanf("%d %d %d", &x, &y, &offset);
+if(x>np || y>=s[i] || offset>=ps)
+printf("\n Invalid Process or Page Number or offset");
+else
+{
+pa=fno[x][y]*ps + offset;
+printf("\n The Physical Address is -- %d", pa);
+}
+return 0;
+}
+
+INPUT
+ Enter the memory size – 1000 
+ Enter the page size -- 100
+ The no. of pages available in memory are -- 10
+ Enter number of processes -- 3
+ Enter no. of pages required for p[1] -- 4
+ Enter page table for  p[1] ---           8  6  9  5
+ Enter no. of pages required for p[2] -- 5
+ Enter page table for  p[2] ---            1  4  5  7  3
+ Enter no. of pages required for p[3] -- 5
+OUTPUT 
+Memory is Full 
+Enter Logical Address to find Physical Address 
+
+Enter process no. and page number and offset -----   2   3   60
+
+ The Physical Address is ----   760
+-------------------------------------------------------------------------------------------------
+
+execution of a program  as: 
+np=3
+no. of pages=10
+
+i=1  1<=3 y
+
+s[1] =4,
+ 
+4>rampage   N
+
+rampage= 10-4=6
+
+no. pages for process 1=4
+for process 1 page table :  f[1][0]= 8   f[1][1]= 6  f[1][2]= 9  f[1][3]= 5
+
+for process 2 no. pages =  5 
+
+page table : f[2][0]=1   f[2][1]= 4 f[2][2]= 5 f[2][3]= 7 f[2][4]= 3
+
+
+Enter Logical Address to find Physical Address 
+
+process no=2  page3= 3  offset= 60
+
+     f[2][3]=7  i.e. locate at memory frame 7 for 4th page of process 2  
+
+pa=fno[x][y]*ps + offset;
+
+   = 7*100+ 60 
+   = 760 
