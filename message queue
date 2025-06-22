@@ -1,0 +1,92 @@
+Message Queues:
+
+1.	ftok - generate an IPC key  (ftok means function test ok)
+#include <sys/ipc.h>
+
+key_t ftok(const char *path, int id);
+Returns: Key if ok, 
+               -1 on error.    
+The function ftok to convert pathname of existing file and ID values to a key.
+2.	msgget - get the message queue identifier
+#include <sys/msg.h>
+
+int msgget(key_t key, int msgflg);
+Returns: message queue ID if OK.
+         -1 on error     
+The msgget() function shall return the message queue identifier associated with the argument key.
+A message queue identifier, associated message queue, and data structure (see <sys/msg.h>), shall be created for the argument key if one of the following is true:
+•	The argument key is equal to IPC_PRIVATE.
+•	The argument key does not already have a message queue identifier associated with it, and (msgflg & IPC_CREAT) is non-zero.
+3.	msgctl - XSI message control operations
+#include <sys/msg.h>
+
+int msgctl(int msqid, int cmd, struct msqid_ds *buf);
+Returns: 0 if ok , -1 on error.
+4.	msgsnd - XSI message send operation
+#include <sys/msg.h>
+
+int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg); 
+Returns: 0 if ok , -1 on error.
+5.	msgrcv - XSI message receive operation
+
+#include <sys/msg.h>
+
+ssize_t msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp,
+       int msgflg);
+Returns : size of data portion of message if ok , -1 on error.
+
+writer.c
+// C program to send message using message queues   
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+// structure for message queue
+struct msg_buffer {
+   	long msg_type;
+	 char msg[100];
+	} message;
+
+int main() {
+   key_t my_key;
+   int msg_id;
+   my_key = ftok("programfile", 85); //create unique key
+
+   //create message queue and return id
+   msg_id = msgget(my_key, 0666 | IPC_CREAT);
+   message.msg_type = 120;
+   printf("Write Message : ");
+   fgets(message.msg, 100, stdin);
+   msgsnd(msg_id, &message, sizeof(message), 0); //send message
+   printf("Sent message is : %s \n", message.msg);
+}
+
+
+reader.c
+
+// C program to receive a message from writer using message queues
+ #include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+// Define message queue structure
+struct msg_buffer {
+	   long msg_type;
+ 	  char msg[100];
+	} message;
+int main() {
+   key_t my_key;
+   int msg_id;
+   my_key = ftok("programfile", 85); //create unique key
+   msg_id = msgget(my_key, 0666 | IPC_CREAT); //create message queue and return id
+   msgrcv(msg_id, &message, sizeof(message), 120, 0); //used to receive message
+   // display the message
+   printf("Received Message is : %s \n", message.msg);
+   msgctl(msg_id, IPC_RMID, NULL); //destroy the message queue
+   return 0;
+}
+
+Output: Run the two programs simultaneously on two terminals.
+
+Terminal 1:                                                       Terminal 2: 
+
+	
