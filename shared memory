@@ -1,0 +1,138 @@
+Shared Memory:
+1.	shmget - get an XSI shared memory segment
+
+#include <sys/shm.h>
+
+int shmget(key_t key, size_t size, int shmflg); 
+
+Returns: shared memory ID if OK, -1 on error.
+
+2.	shmat - XSI shared memory attach operation
+
+#include <sys/shm.h>
+
+void *shmat(int shmid, const void *shmaddr, int shmflg); 
+
+Returns: pointer to shared memory segment if ok , -1 on error.
+
+The shmat() function attaches the shared memory segment associated with the shared memory identifier specified by shmid to the address space of the calling process.
+
+
+3.	shmctl - XSI shared memory control operations
+
+#include <sys/shm.h>
+
+int shmctl(int shmid, int cmd, struct shmid_ds *buf);
+Returns: 0 if ok , -1 on error.
+
+4.	shmdt - XSI shared memory detach operation
+
+#include <sys/shm.h>
+
+int shmdt(const void *shmaddr);
+Returns : 0 if ok , -1 on error.
+
+
+
+//SHMServer.c
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define MAXSIZE   27
+int main()
+{
+    char c;
+    int shmid;
+    key_t key;
+    char *shm, *s;
+
+    key = 5678;
+
+    if ((shmid = shmget(key, MAXSIZE, IPC_CREAT | 0666)) < 0)
+        {
+        printf("shmget error");
+        return 1;
+        }
+
+    if ((shm = shmat(shmid, NULL, 0)) == (char *) -1)
+        {
+         printf("shmat error");
+         return 1;
+         }
+
+    /*
+     *      * Put some things into the memory for the
+     *        other process to read.
+     *        */
+    s = shm;
+
+    for (c = 'a'; c <= 'z'; c++)
+        *s++ = c;
+
+
+    /*
+     * Wait until the other process
+     * changes the first character of our memory
+     * to '*', indicating that it has read what
+     * we put there.
+     */
+    while (*shm != '*')
+        sleep(1);
+        
+        //detach from shared memory  
+    shmdt(shm);
+    
+    // destroy the shared memory
+    shmctl(shmid,IPC_RMID,NULL);
+     
+    return 0;
+    //exit(0);
+}
+
+//SHMClient.c
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXSIZE     27
+int main()
+{
+    int shmid;
+    key_t key;
+    char *shm, *s;
+
+    key = 5678;
+
+    if ((shmid = shmget(key, MAXSIZE, 0666)) < 0)
+        {
+         printf("shmget error"); return 1;
+         }
+
+    if ((shm = shmat(shmid, NULL, 0)) == (char *) -1)
+        {
+        printf("shmat error");
+        return 1;
+        }
+
+    //Now read what the server put in the memory.
+    for (s = shm; *s != '\0'; s++)
+        putchar(*s);
+    putchar('\n');
+
+    /*
+     *Change the first character of the
+     *segment to '*', indicating we have read
+     *the segment.
+     */
+    *shm = '*';
+
+    exit(0);
+}
+Output: Run the two programs simultaneously on two terminals.
+
